@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+    api:
+        build: ./service/
+        environment:
+            - loglevel=none
+            - NODE_ENV=development
+            - MONGODB_URI=mongodb://mongodb:27017/mongo
+            - PORT=3000
+            - API_SECRET=<KEY_HERE>
+        volumes:
+            - "./service/:/src/app"
+            - './service/package.json:/src/package.json'
+        working_dir: "/src/app"
+        command: bash -c "npm install &&  npm run start"
+        ports:
+            - "3000:3000" 
+    
+    mongodb:
+        image: mongo
+        ports:
+            - "27017:27017"

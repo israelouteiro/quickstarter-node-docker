@@ -1,0 +1,14 @@
+{
+  "name": "node-api",
+  "version": "0.0.0",
+  "description": "",
+  "main": "service/index.js",
+  "scripts": {
+    "babel-node": "babel-node --presets=latest",
+    "start": "npm start --prefix service  ",
+    "test": "npm test --prefix service  "
+  },
+  "keywords": [],
+  "author": "Israel Outeiro",
+  "license": "MIT"
+}
