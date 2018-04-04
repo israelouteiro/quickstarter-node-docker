@@ -82,10 +82,7 @@ export default class AuthService {
   		resolve({ 
   			status:'Success',
   			message:'Hash generated with Success',
-			hash: require('crypto')
-				  .createHash('sha256')
-				  .update(`${ Math.random(10000000) }`)
-				  .update('salt').digest('hex') 
+			hash: util.generateHash()
 		});
   	})
   }

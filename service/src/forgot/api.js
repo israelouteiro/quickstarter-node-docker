@@ -37,7 +37,7 @@ export default class ForgotApi {
 		 * @apiVersion 1.0.0 
 		 *   
 		 * @apiParam {String} cpf Email of Received
-		 * @apiParam {String} pin Pin Received
+		 * @apiParam {String} token Token Received
 		 * @apiParam {String} password User new password
 		 * 
 		 * @apiSuccess {String} status Status of request ( Success )

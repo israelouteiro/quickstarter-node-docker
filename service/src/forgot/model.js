@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const ForgotMongoose = mongoose.Schema({
-	pin: {
+	token: {
 		type: String,
 		required: false,
 	},

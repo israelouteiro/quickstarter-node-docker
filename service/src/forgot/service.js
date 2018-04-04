@@ -10,61 +10,71 @@ export default class ForgotService {
 
 	save(req){
 		let { email } = req.body;
-		let generated_pin = this.generatePin();
-
-			if( `${ generated_pin }`.length < 6 ){
-				this.save(req)
-			}
+		
 
 		return new Promise((resolve, reject)=>{
-			ForgotModel.find({ pin : generated_pin }, (err, result)=>{
-				if(err){ reject(err); return; }
-				if( result.length > 0 ){
-					resolve( this.save(req) )
-				}else{  
-					/////
-					UsersModel.find({ email }, (user_err, user_result)=>{
-						if(user_err){ reject(user_err) }
-						if(user_result.length < 1 ){ 
-							let errOut = {
-								status:'Error',
-								messages:['User not found']
-							}
-							reject(errOut);
-						}
-						let user = user_result.shift(); 
-						util.sendSMS(user.phone, `Your Recovery PIN is: ${ generated_pin }`)
-						.then( response => {
-							ForgotModel.remove({
-								user_id: user._id
-							}, (err, result)=>{
-								if(err){ reject(err); return; }
-								new ForgotModel({
-									pin: generated_pin,
-									user_id: user._id
-								}).save((err, doc) => {
-						            if(err){ reject(err); return; }
-						            let output = {
-					                	status:'Success',
-					                	message:'Pin sent with success'
-					                } 
-					                resolve(output);
-								}) 
-							})
-						}).catch( error => {
-							reject(error)
-						})   
-					}) 
-					/////
+			
+			UsersModel.find({ email }, (user_err, user_result)=>{
+				if(user_err){ reject(user_err) }
+				if(user_result.length < 1 ){ 
+					let errOut = {
+						status:'Error',
+						messages:['User not found']
+					}
+					reject(errOut);
 				}
-			})
+				let user = user_result.shift(); 
+				let token = util.generateHash();
+
+
+				util.sendEmail(user.email, `${ process.env.APPLICATION_NAME } - Recuperação de senha`, util.forgotEmail(user, token))
+					.then( response => {
+						new ForgotModel({ 
+							token,
+							user_id: user._id
+						}).save((err, doc) => {
+				            if(err){ reject(err); return; }
+				            let output = {
+			                	status:'Success',
+			                	message:'Recovery email sent with success'
+			                } 
+			                resolve(output);
+						}) 
+					}).catch( error => { reject(error); } ) 
+
+
+				// util.sendSMS(user.phone, `Your Recovery PIN is: ${ generated_pin }`)
+				// .then( response => {
+				// 	ForgotModel.remove({
+				// 		user_id: user._id
+				// 	}, (err, result)=>{
+				// 		if(err){ reject(err); return; }
+						// new ForgotModel({
+						// 	pin: generated_pin,
+						// 	user_id: user._id
+						// }).save((err, doc) => {
+				  //           if(err){ reject(err); return; }
+				  //           let output = {
+			   //              	status:'Success',
+			   //              	message:'Pin sent with success'
+			   //              } 
+			   //              resolve(output);
+						// }) 
+				// 	})
+				// }).catch( error => {
+				// 	reject(error)
+				// })   
+
+
+
+			}) 
 		})
 
 		
 	}
 
 	validateAndRemove(req){ 
-		let { pin, email, password } = req.body; 
+		let { token, email, password } = req.body; 
 
 		return new Promise((resolve, reject)=>{
 
@@ -81,7 +91,7 @@ export default class ForgotService {
 				let user = user_result.shift(); 
 
 					ForgotModel.find({
-						pin: pin,
+						token,
 						user_id: user._id
 					}, ( err, result )=>{
 						if(err){ reject(err); return; }
@@ -94,7 +104,7 @@ export default class ForgotService {
 								}, { password: hash }, (err, result)=>{
 									if(err){reject(err); return }
 									ForgotModel.remove({
-										pin: pin
+										token
 									}, (errr, resultt) => {
 										if(err){reject(err); return }
 										let output = {
@@ -109,7 +119,7 @@ export default class ForgotService {
 						}else{
 							let errOut = {
 								status:'Error',
-								messages:['Pin not match']
+								messages:['Token not match or already used']
 							}
 							reject(errOut);
 						}

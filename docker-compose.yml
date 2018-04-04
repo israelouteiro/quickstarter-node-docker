@@ -8,7 +8,16 @@ services:
             - NODE_ENV=development
             - MONGODB_URI=mongodb://mongodb:27017/mongo
             - PORT=3000
-            - API_SECRET=<KEY_HERE>
+            - API_SECRET=<api_key_here>
+            - APPLICATION_NAME=NodeApi
+            - APPLICATION_URL=http://localhost:4200/
+            - TWILIO_SID=
+            - TWILIO_TOKEN=
+            - TWILIO_PHONE=
+            - SMTP_EMAIL=
+            - SMTP_SENDER=
+            - SMTP_PASSWORD=
+            - SMTP_SERVICE=gmail
         volumes:
             - "./service/:/src/app"
             - './service/package.json:/src/package.json'

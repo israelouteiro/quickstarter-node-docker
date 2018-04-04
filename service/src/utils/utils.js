@@ -1,10 +1,7 @@
 
-// Twilio Credentials
-const accountSid = 'AC824e26650e496f390c9cbcd505832089';
-const authToken = 'b9750806e2644eb8be18f108c025300c';
-
 // require the Twilio module and create a REST client
-const clientTwilio = require('twilio')(accountSid, authToken);
+const clientTwilio = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+const nodemailer = require('nodemailer');
 
 export default class Utils { 
 
@@ -36,17 +33,57 @@ export default class Utils {
     return cpf.replace('-', '');
   }
 
+  generateHash(){
+    return require('crypto')
+          .createHash('sha256')
+          .update(`${ Math.random(10000000) }`)
+          .update('salt').digest('hex')
+  }
+
   sendSMS(phone, msg ){
     return new Promise(( resolve, reject) => {
       clientTwilio.messages.create({
           to: phone,
-          from: '+13304038180',
+          from: process.env.TWILIO_PHONE,
           body: msg,
         }, (err, message) => {
           if(err){ reject(err) }
             resolve(message)
         });
     })
+  } 
+
+  sendEmail(email, subject, body){ 
+    return new Promise((resolve, reject)=>{
+
+        let transporter = 
+        nodemailer.createTransport({
+          service: process.env.SMTP_SERVICE,
+          auth: {
+            user: process.env.SMTP_EMAIL,
+            pass: process.env.SMTP_PASSWORD
+          }
+        });
+      
+        transporter.sendMail({
+          from: process.env.SMTP_SENDER,
+          to: email,
+          subject: subject,
+          html: body
+        }, (error, info) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(info);
+            }
+        });
+
+    }) 
+  }
+
+
+  forgotEmail(user, token){
+    return `Caso nao tenha solicitado esse email, descosidere-o <br> <a href="${ process.env.APPLICATION_URL }create_password?email=${ user.email }&token=${ token }" target="new">clique aqui</a> para criar sua nova senha`
   }
 
 }
