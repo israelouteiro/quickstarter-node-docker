@@ -1,5 +1,5 @@
 {
-  "name": "node-api",
+  "name": "node-api-v1",
   "version": "0.0.0",
   "description": "",
   "main": "service/index.js",
